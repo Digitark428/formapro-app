@@ -45,9 +45,9 @@ Les champs sont déjà pré-remplis sur la page de connexion.
 2. **Contact** (`/contact`) — remplissez le formulaire prospect : une fiche est **créée automatiquement** dans le CRM avec le statut *Nouveau Prospect*.
 3. **Espace admin** (`/admin/login`) — connectez-vous avec les identifiants ci-dessus.
    - **Dashboard** — KPIs, graphiques (acquisition, CA), pipeline, activité récente, alertes.
-   - **CRM** — vue **Kanban** (glisser-déposer pour changer le statut) ou liste. Cliquez une fiche pour ouvrir le détail : changement de statut, notes, historique des échanges.
-   - **Relances** — prospects sans activité depuis 7 jours, propositions à relancer, conventions non signées + centre de notifications.
-   - **Documents** — génération simulée à partir de 6 modèles (Programme, Convention, Convocation, Questionnaire, Règlement intérieur, Livret d'accueil).
+   - **CRM** — vue **Kanban** (glisser-déposer pour changer le statut) ou liste. Chaque prospect peut être **pris en charge** par un chargé d'affaires (Sophie Fournier, Thomas Martin, Julie Robert) ; le responsable s'affiche sur la carte et dans la fiche. La fiche propose des **actions commerciales** (Appel, Email, Rendez-vous) qui alimentent automatiquement un **historique des interactions** visuel. Le changement de statut reste manuel.
+   - **Relances** — tableau priorisé : Prospect, Responsable, Dernier contact, Prochaine relance (J+7), Niveau d'urgence (Faible / Moyenne / Élevée). Le bouton « Relancer » enregistre la relance et l'ajoute à l'historique du prospect.
+   - **Documents** — bibliothèque de **modèles** (ajout / modification / suppression, upload simulé PDF/DOCX, types Convention, Programme, Convocation, Questionnaire, Attestation, Facture) et **génération** d'un document à partir d'un prospect + un modèle.
    - **Signature** — suivi des documents envoyés / en attente / signés, envoi pour signature, note d'intégration **Yousign** à venir.
    - **Archivage** — gestion documentaire arborescente **Client → Formation → Documents**.
 

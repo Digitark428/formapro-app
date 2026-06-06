@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import {
-  LayoutGrid, List, Search, Phone, Mail, ChevronRight, GripVertical,
+  LayoutGrid, List, Search, Phone, Mail, ChevronRight, GripVertical, UserPlus,
 } from "lucide-react";
 import { Avatar, StatusBadge } from "@/components/ui/Badge";
 import ProspectDrawer from "@/components/admin/ProspectDrawer";
@@ -15,8 +15,14 @@ export default function CrmPage() {
   const [view, setView] = useState("kanban");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(null);
+  const [autoAssign, setAutoAssign] = useState(false);
   const [dragId, setDragId] = useState(null);
   const [dragOver, setDragOver] = useState(null);
+
+  const openProspect = (id, assign = false) => {
+    setAutoAssign(assign);
+    setSelected(id);
+  };
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -92,7 +98,7 @@ export default function CrmPage() {
                       draggable
                       onDragStart={() => setDragId(p.id)}
                       onDragEnd={() => { setDragId(null); setDragOver(null); }}
-                      onClick={() => setSelected(p.id)}
+                      onClick={() => openProspect(p.id)}
                       className={`group cursor-pointer rounded-xl border border-ink/8 bg-white p-3 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-card ${
                         dragId === p.id ? "opacity-40" : ""
                       }`}
@@ -109,10 +115,18 @@ export default function CrmPage() {
                         <span className="inline-flex items-center gap-1"><Phone size={11} /> {p.telephone || "—"}</span>
                         <span>{formatDate(p.createdAt)}</span>
                       </div>
-                      {p.notes.length > 0 && (
-                        <p className="mt-2 truncate rounded-lg bg-cream px-2 py-1 text-xs text-ink/55">
-                          {p.notes[0].texte}
-                        </p>
+                      {p.responsable ? (
+                        <div className="mt-2 flex items-center gap-1.5 border-t border-ink/6 pt-2 text-xs font-medium text-ink/70">
+                          <Avatar prenom={p.responsable.split(" ")[0]} nom={p.responsable.split(" ")[1]} size={18} />
+                          {p.responsable}
+                        </div>
+                      ) : (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); openProspect(p.id, true); }}
+                          className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-teal-50 px-2 py-1.5 text-xs font-bold text-teal-700 ring-1 ring-teal-200 transition-colors hover:bg-teal-100"
+                        >
+                          <UserPlus size={13} /> Prendre en charge
+                        </button>
                       )}
                     </article>
                   ))}
@@ -137,6 +151,7 @@ export default function CrmPage() {
                 <tr className="border-b border-ink/8 bg-cream text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">
                   <th className="px-5 py-3">Nom</th>
                   <th className="px-5 py-3">Entreprise</th>
+                  <th className="px-5 py-3">Responsable</th>
                   <th className="px-5 py-3">Téléphone</th>
                   <th className="px-5 py-3">Email</th>
                   <th className="px-5 py-3">Créé le</th>
@@ -148,7 +163,7 @@ export default function CrmPage() {
                 {filtered.map((p) => (
                   <tr
                     key={p.id}
-                    onClick={() => setSelected(p.id)}
+                    onClick={() => openProspect(p.id)}
                     className="cursor-pointer transition-colors hover:bg-cream"
                   >
                     <td className="px-5 py-3">
@@ -158,6 +173,18 @@ export default function CrmPage() {
                       </div>
                     </td>
                     <td className="px-5 py-3 text-ink/75">{p.entreprise}</td>
+                    <td className="px-5 py-3">
+                      {p.responsable ? (
+                        <span className="inline-flex items-center gap-1.5 text-ink/75">
+                          <Avatar prenom={p.responsable.split(" ")[0]} nom={p.responsable.split(" ")[1]} size={22} />
+                          {p.responsable}
+                        </span>
+                      ) : (
+                        <button onClick={(e) => { e.stopPropagation(); openProspect(p.id, true); }} className="inline-flex items-center gap-1 rounded-lg bg-teal-50 px-2 py-1 text-xs font-bold text-teal-700 ring-1 ring-teal-200 hover:bg-teal-100">
+                          <UserPlus size={12} /> Prendre en charge
+                        </button>
+                      )}
+                    </td>
                     <td className="px-5 py-3 text-ink/60">{p.telephone || "—"}</td>
                     <td className="px-5 py-3 text-ink/60">{p.email}</td>
                     <td className="px-5 py-3 text-ink/60">{formatDate(p.createdAt, { year: true })}</td>
@@ -175,7 +202,11 @@ export default function CrmPage() {
       )}
 
       {selectedProspect && (
-        <ProspectDrawer prospect={selectedProspect} onClose={() => setSelected(null)} />
+        <ProspectDrawer
+          prospect={selectedProspect}
+          autoAssign={autoAssign}
+          onClose={() => { setSelected(null); setAutoAssign(false); }}
+        />
       )}
     </div>
   );

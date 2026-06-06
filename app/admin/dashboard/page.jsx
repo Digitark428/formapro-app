@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   Users, UserCheck, FolderClock, CalendarClock, FileSignature,
   ArrowUpRight, AlertTriangle, Phone, Mail, CalendarCheck, StickyNote, Plus,
+  BellRing, FileText,
 } from "lucide-react";
 import StatCard from "@/components/admin/StatCard";
 import { AreaChart, BarChart, Donut } from "@/components/ui/Charts";
@@ -11,7 +12,7 @@ import { useStore } from "@/lib/store";
 import { STATUSES, statusById, KPI_SERIES } from "@/lib/mockData";
 import { relativeTime, daysSince } from "@/lib/utils";
 
-const ACT_ICONS = { creation: Plus, appel: Phone, email: Mail, rdv: CalendarCheck, statut: ArrowUpRight, note: StickyNote };
+const ACT_ICONS = { creation: Plus, assignation: UserCheck, appel: Phone, email: Mail, rdv: CalendarCheck, statut: ArrowUpRight, note: StickyNote, relance: BellRing, doc: FileText };
 
 export default function DashboardPage() {
   const { prospects, signatures, documents } = useStore();

@@ -5,6 +5,7 @@ import {
   SEED_PROSPECTS,
   SEED_DOCUMENTS,
   SEED_SIGNATURES,
+  SEED_TEMPLATES,
 } from "./mockData";
 import { uid } from "./utils";
 
@@ -29,6 +30,7 @@ export function StoreProvider({ children }) {
   const [prospects, setProspects] = useState(SEED_PROSPECTS);
   const [documents, setDocuments] = useState(SEED_DOCUMENTS);
   const [signatures, setSignatures] = useState(SEED_SIGNATURES);
+  const [templates, setTemplates] = useState(SEED_TEMPLATES);
   const [authed, setAuthed] = useState(false);
 
   // Hydrate from localStorage on mount
@@ -38,6 +40,7 @@ export function StoreProvider({ children }) {
       setProspects(saved.prospects || SEED_PROSPECTS);
       setDocuments(saved.documents || SEED_DOCUMENTS);
       setSignatures(saved.signatures || SEED_SIGNATURES);
+      setTemplates(saved.templates || SEED_TEMPLATES);
     }
     try {
       setAuthed(window.localStorage.getItem(AUTH_KEY) === "1");
@@ -51,10 +54,10 @@ export function StoreProvider({ children }) {
     try {
       window.localStorage.setItem(
         LS_KEY,
-        JSON.stringify({ prospects, documents, signatures })
+        JSON.stringify({ prospects, documents, signatures, templates })
       );
     } catch (e) {}
-  }, [prospects, documents, signatures, hydrated]);
+  }, [prospects, documents, signatures, templates, hydrated]);
 
   // ---- Auth ----
   const login = useCallback((email, password) => {
@@ -82,6 +85,7 @@ export function StoreProvider({ children }) {
       id: uid("p"),
       ...data,
       status: "nouveau",
+      responsable: null,
       createdAt: now,
       lastActivity: now,
       notes: [],
@@ -146,11 +150,68 @@ export function StoreProvider({ children }) {
     );
   }, []);
 
+  const assignProspect = useCallback((id, responsable) => {
+    const now = new Date().toISOString();
+    setProspects((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              responsable,
+              lastActivity: now,
+              historique: [
+                ...p.historique,
+                { id: uid("h"), date: now, type: "assignation", texte: `Prospect assigné à ${responsable}` },
+              ],
+            }
+          : p
+      )
+    );
+  }, []);
+
+  const logRelance = useCallback((id) => {
+    const now = new Date().toISOString();
+    setProspects((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              lastActivity: now,
+              historique: [
+                ...p.historique,
+                {
+                  id: uid("h"),
+                  date: now,
+                  type: "relance",
+                  texte: `Relance effectuée${p.responsable ? ` par ${p.responsable}` : ""}`,
+                },
+              ],
+            }
+          : p
+      )
+    );
+  }, []);
+
   // ---- Documents ----
   const addDocument = useCallback((doc) => {
     const d = { id: uid("d"), date: new Date().toISOString(), statut: "genere", ...doc };
     setDocuments((prev) => [d, ...prev]);
     return d;
+  }, []);
+
+  // ---- Modèles de documents (bibliothèque) ----
+  const addTemplate = useCallback((tpl) => {
+    const t = { id: uid("tpl"), ...tpl };
+    setTemplates((prev) => [...prev, t]);
+    return t;
+  }, []);
+
+  const updateTemplate = useCallback((id, patch) => {
+    setTemplates((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+  }, []);
+
+  const deleteTemplate = useCallback((id) => {
+    setTemplates((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   // ---- Signatures ----
@@ -172,6 +233,7 @@ export function StoreProvider({ children }) {
     setProspects(SEED_PROSPECTS);
     setDocuments(SEED_DOCUMENTS);
     setSignatures(SEED_SIGNATURES);
+    setTemplates(SEED_TEMPLATES);
   }, []);
 
   const value = {
@@ -179,14 +241,20 @@ export function StoreProvider({ children }) {
     prospects,
     documents,
     signatures,
+    templates,
     authed,
     login,
     logout,
     addProspect,
     updateProspectStatus,
+    assignProspect,
     addNote,
     logActivity,
+    logRelance,
     addDocument,
+    addTemplate,
+    updateTemplate,
+    deleteTemplate,
     addSignature,
     markSigned,
     resetDemo,
