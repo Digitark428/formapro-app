@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   X, Phone, Mail, MapPin, Hash, Users, Briefcase, GraduationCap,
   Plus, Send, Clock, ArrowUpRight, StickyNote, CalendarClock, ChevronDown,
-  UserPlus, UserCheck, BellRing, FileText, History, Check,
+  UserPlus, UserCheck, BellRing, FileText, History, Check, Trash2, AlertTriangle,
 } from "lucide-react";
 import { Avatar, StatusBadge } from "@/components/ui/Badge";
 import { STATUSES, FORMATIONS, RESPONSABLES } from "@/lib/mockData";
@@ -27,11 +27,12 @@ const frDate = (val) => {
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
 export default function ProspectDrawer({ prospect, onClose, autoAssign = false }) {
-  const { updateProspectStatus, assignProspect, addNote, logActivity } = useStore();
+  const { updateProspectStatus, assignProspect, addNote, logActivity, deleteProspect } = useStore();
   const [note, setNote] = useState("");
   const [statusOpen, setStatusOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(autoAssign);
   const [action, setAction] = useState(null); // 'appel' | 'email' | 'rdv'
+  const [confirmDelete, setConfirmDelete] = useState(false);
   // action form fields
   const [aDate, setADate] = useState(todayISO());
   const [aTime, setATime] = useState("10:00");
@@ -218,6 +219,17 @@ export default function ProspectDrawer({ prospect, onClose, autoAssign = false }
               })}
             </ol>
           </div>
+
+          {/* Zone dangereuse */}
+          <div className="mt-2 rounded-xl border border-red-200 bg-red-50/40 p-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-red-700">Zone dangereuse</p>
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2.5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50"
+            >
+              <Trash2 size={15} /> Supprimer définitivement ce prospect
+            </button>
+          </div>
         </div>
       </div>
 
@@ -270,6 +282,29 @@ export default function ProspectDrawer({ prospect, onClose, autoAssign = false }
             </div>
 
             <button onClick={submitAction} className="btn-primary mt-5 w-full py-3"><Check size={16} /> Enregistrer dans l'historique</button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation suppression */}
+      {confirmDelete && (
+        <div className="absolute inset-0 z-20 grid place-items-center p-4">
+          <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm" onClick={() => setConfirmDelete(false)} />
+          <div className="relative w-full max-w-sm rounded-3xl border border-ink/8 bg-white p-6 text-center shadow-float animate-scale-in">
+            <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600"><AlertTriangle size={26} /></span>
+            <h3 className="mt-4 font-display text-lg font-bold text-ink">Supprimer ce prospect ?</h3>
+            <p className="mt-1 text-sm text-ink-muted">
+              <span className="font-semibold text-ink">{prospect.prenom} {prospect.nom}</span> ({prospect.entreprise}) et tout son historique seront définitivement supprimés. Cette action est irréversible.
+            </p>
+            <div className="mt-6 flex gap-2">
+              <button onClick={() => setConfirmDelete(false)} className="flex-1 rounded-xl border border-ink/10 px-4 py-2.5 text-sm font-semibold">Annuler</button>
+              <button
+                onClick={() => { const id = prospect.id; setConfirmDelete(false); onClose && onClose(); deleteProspect(id); }}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+              >
+                <Trash2 size={14} /> Supprimer
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -192,6 +192,10 @@ export function StoreProvider({ children }) {
     );
   }, []);
 
+  const deleteProspect = useCallback((id) => {
+    setProspects((prev) => prev.filter((p) => p.id !== id));
+  }, []);
+
   // ---- Documents ----
   const addDocument = useCallback((doc) => {
     const d = { id: uid("d"), date: new Date().toISOString(), statut: "genere", ...doc };
@@ -251,6 +255,7 @@ export function StoreProvider({ children }) {
     addNote,
     logActivity,
     logRelance,
+    deleteProspect,
     addDocument,
     addTemplate,
     updateTemplate,
